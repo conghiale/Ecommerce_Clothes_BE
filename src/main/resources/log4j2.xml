@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- Definition of LOGS variable -->
+    <property name="LOGS" value="${java.io.tmpdir}/LOG_SHOP_SELL_CLOTHING" />
+
+    <!-- Configuration for Development environment -->
+    <springProfile name="development">
+        <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            </encoder>
+        </appender>
+
+        <root level="DEBUG">
+            <appender-ref ref="Console"/>
+        </root>
+    </springProfile>
+
+    <!-- Configuration for Production environment -->
+    <springProfile name="production">
+        <appender name="RollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${LOGS}/spring-boot-logger.log</file>
+            <encoder>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            </encoder>
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <fileNamePattern>${LOGS}/archived/spring-boot-logger-%d{yyyy-MM-dd}.log</fileNamePattern>
+                <maxHistory>30</maxHistory> <!-- Log storage for 30 days -->
+            </rollingPolicy>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="RollingFile"/>
+        </root>
+    </springProfile>
+
+</configuration>
