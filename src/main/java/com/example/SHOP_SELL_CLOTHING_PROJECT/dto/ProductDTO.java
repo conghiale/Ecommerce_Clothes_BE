@@ -27,6 +27,7 @@ import java.util.List;
 @AllArgsConstructor
 public class ProductDTO {
     private Integer productId;
+    private Integer orderItemId;
 
 //    @NotBlank(message = "Product name is required")
     private String productsName;

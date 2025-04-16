@@ -17,4 +17,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 public interface OrderService {
     APIResponse<String> createOrder(Integer userId, OrderDTO orderDTO) throws JsonProcessingException;
+    APIResponse<String> getOrders(Integer userId, Integer page, Integer pageSize) throws JsonProcessingException;
+    APIResponse<String> getOrderDetail(Integer userId, Integer orderId) throws JsonProcessingException;
 }

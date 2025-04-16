@@ -40,4 +40,21 @@ public class OrderController {
         APIResponse<String> resultData = orderService.createOrder(userId, orderDTO);
         return ResponseEntity.ok(resultData);
     }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<APIResponse<String>> getOrders(
+            @PathVariable Integer userId,
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer pageSize) throws JsonProcessingException {
+        APIResponse<String> resultData = orderService.getOrders(userId, page, pageSize);
+        return ResponseEntity.ok(resultData);
+    }
+
+    @GetMapping("/{userId}/order-detail")
+    public ResponseEntity<APIResponse<String>> getOrderDetail(
+            @PathVariable Integer userId,
+            @RequestParam Integer orderId) throws JsonProcessingException {
+        APIResponse<String> resultData = orderService.getOrderDetail(userId, orderId);
+        return ResponseEntity.ok(resultData);
+    }
 }
