@@ -197,15 +197,26 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
-//    Pending
     @Override
-    public APIResponse<String> updateProduct(Product product) throws JsonProcessingException {
+    public APIResponse<String> updateProduct(ProductDTO productDTO) throws JsonProcessingException {
+        List<Map<String, Object>> variantsList = productDTO.getVariants().stream()
+                .map(variant -> {
+                    Map<String, Object> variantMap = new HashMap<>();
+                    variantMap.put("size", variant.getSize());
+                    variantMap.put("quantity", variant.getStockQuantity());
+                    return variantMap;
+                })
+                .collect(Collectors.toList());
+
+        String sizesJson = objectMapper.writeValueAsString(variantsList);
+
         Map<String, Object> result = productRepository.updateProduct(
-                product.getProductId(),
-                product.getProductsName(),
-                product.getDescription(),
-                product.getPrice(),
-                product.getCategory().getCategoryId()
+                productDTO.getProductId(),
+                productDTO.getProductsName(),
+                productDTO.getDescription(),
+                productDTO.getPrice(),
+                productDTO.getCategoryID(),
+                sizesJson
         );
 
         int code = (Integer) result.get("CODE");
@@ -213,7 +224,36 @@ public class ProductServiceImpl implements ProductService {
         if (code == 0) {
             return new APIResponse<>(
                     code,
-                    "Create successful products",
+                    "Update successful products",
+                    objectMapper.writeValueAsString(""),
+                    ResponseType.SUCCESS
+            );
+        } else {
+            APIResponse<String> apiResponse = apiResponseServiceImpl.getAPIResponseByCode(code);
+            APIResponseDTO apiResponseDTO = apiResponse != null ?
+                    objectMapper.readValue(apiResponse.getData(), APIResponseDTO.class) :
+                    new APIResponseDTO();
+
+            return new APIResponse<>(code, apiResponseDTO.getMessage(), null, apiResponseDTO.getResponseType()
+            );
+        }
+    }
+
+    @Override
+    public APIResponse<String> deleteProducts(ProductDTO productDTO) throws JsonProcessingException {
+        // Chuyển list -> chuỗi "1,2,3"
+        String productIds = productDTO.getProductIds().stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining(","));
+
+        Map<String, Object> result = productRepository.deleteProducts(productIds);
+
+        int code = (Integer) result.get("CODE");
+
+        if (code == 0) {
+            return new APIResponse<>(
+                    code,
+                    "Deleted successful products",
                     objectMapper.writeValueAsString(""),
                     ResponseType.SUCCESS
             );

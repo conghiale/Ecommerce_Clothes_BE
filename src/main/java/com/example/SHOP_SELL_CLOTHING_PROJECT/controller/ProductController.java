@@ -69,14 +69,19 @@ public class ProductController {
         return ResponseEntity.ok(new APIResponse<>(resultData.getCode(), resultData.getMessage(), resultData.getData(), resultData.getResponseType()));
     }
 
-//    Pending
     @PutMapping("/{id}")
     public ResponseEntity<APIResponse<String>> updateProduct(
             @PathVariable Integer id,
             @Valid @RequestBody ProductDTO productDTO) throws JsonProcessingException {
-        Product product = convertToProduct(productDTO);
-        product.setProductId(id);
-        APIResponse<String> resultData = productService.updateProduct(product);
+//        Product product = convertToProduct(productDTO);
+        productDTO.setProductId(id);
+        APIResponse<String> resultData = productService.updateProduct(productDTO);
+        return ResponseEntity.ok(new APIResponse<>(resultData.getCode(), resultData.getMessage(), resultData.getData(), resultData.getResponseType()));
+    }
+
+    @DeleteMapping("/delete-products")
+    public ResponseEntity<APIResponse<String>> deleteProducts(@Valid @RequestBody ProductDTO productDTO) throws JsonProcessingException {
+        APIResponse<String> resultData = productService.deleteProducts(productDTO);
         return ResponseEntity.ok(new APIResponse<>(resultData.getCode(), resultData.getMessage(), resultData.getData(), resultData.getResponseType()));
     }
 

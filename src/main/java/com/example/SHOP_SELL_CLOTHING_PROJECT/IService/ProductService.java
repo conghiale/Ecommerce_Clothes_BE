@@ -26,5 +26,6 @@ public interface ProductService {
                                  Integer page, Integer pageSize) throws JsonProcessingException;
     APIResponse<String> getAvailableProducts(Integer page, Integer pageSize) throws JsonProcessingException;
     APIResponse<String> updateProductStatus(Integer productId, String status) throws JsonProcessingException;
-    APIResponse<String> updateProduct(Product product) throws JsonProcessingException;
+    APIResponse<String> updateProduct(ProductDTO productDTO) throws JsonProcessingException;
+    APIResponse<String> deleteProducts(ProductDTO productDTO) throws JsonProcessingException;
 }

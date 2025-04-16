@@ -278,9 +278,8 @@ public class ProductRepository {
         return result;
     }
 
-//    Pending
     public Map<String, Object> updateProduct(Integer productId, String productsName,
-                                           String description, BigDecimal price, Integer categoryId) {
+                                           String description, BigDecimal price, Integer categoryId, String sizes) {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         EntityTransaction transaction = entityManager.getTransaction();
         Map<String, Object> result = new HashMap<>();
@@ -295,12 +294,14 @@ public class ProductRepository {
                     .registerStoredProcedureParameter("p_DESCRIPTION", String.class, ParameterMode.IN)
                     .registerStoredProcedureParameter("p_PRICE", BigDecimal.class, ParameterMode.IN)
                     .registerStoredProcedureParameter("p_CATEGORY_ID", Integer.class, ParameterMode.IN)
+                    .registerStoredProcedureParameter("p_SIZES", String.class, ParameterMode.IN)
                     .registerStoredProcedureParameter("p_CODE", Integer.class, ParameterMode.OUT)
                     .setParameter("p_PRODUCT_ID", productId)
                     .setParameter("p_PRODUCTS_NAME", productsName)
                     .setParameter("p_DESCRIPTION", description)
                     .setParameter("p_PRICE", price)
-                    .setParameter("p_CATEGORY_ID", categoryId);
+                    .setParameter("p_CATEGORY_ID", categoryId)
+                    .setParameter("p_SIZES", sizes);
 
             query.execute();
             Integer code = (Integer) query.getOutputParameterValue("p_CODE");
@@ -321,6 +322,44 @@ public class ProductRepository {
             }
         }
         
+        return result;
+    }
+
+    public Map<String, Object> deleteProducts(String productIds) {
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        EntityTransaction transaction = entityManager.getTransaction();
+        Map<String, Object> result = new HashMap<>();
+
+        System.out.println("[CHECK DELETE PRODUCTS] productIds: " + productIds);
+
+        try {
+            transaction.begin();
+
+            StoredProcedureQuery query = entityManager
+                    .createStoredProcedureQuery("SP_PRODUCTS_DELETE")
+                    .registerStoredProcedureParameter("p_PRODUCT_IDS", String.class, ParameterMode.IN)
+                    .registerStoredProcedureParameter("p_CODE", Integer.class, ParameterMode.OUT)
+                    .setParameter("p_PRODUCT_IDS", productIds);
+
+            query.execute();
+            Integer code = (Integer) query.getOutputParameterValue("p_CODE");
+
+            result.put("CODE", code);
+
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null && transaction.isActive()) {
+                transaction.rollback();
+            }
+            result.put("CODE", 1);
+            result.put("ERROR", e.getMessage());
+            log.error("[CHECK PRODUCT REPOSITORY] Delete Product. ERROR: ", e);
+        } finally {
+            if (entityManager.isOpen()) {
+                entityManager.close();
+            }
+        }
+
         return result;
     }
 

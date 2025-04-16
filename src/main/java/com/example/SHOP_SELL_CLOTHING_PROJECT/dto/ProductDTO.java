@@ -28,13 +28,13 @@ import java.util.List;
 public class ProductDTO {
     private Integer productId;
 
-    @NotBlank(message = "Product name is required")
+//    @NotBlank(message = "Product name is required")
     private String productsName;
 
     private String description;
 
-    @NotNull(message = "Price is required")
-    @Min(value = 0, message = "Price must be positive")
+//    @NotNull(message = "Price is required")
+//    @Min(value = 0, message = "Price must be positive")
     private BigDecimal price;
 
     private Integer categoryID;
@@ -47,4 +47,7 @@ public class ProductDTO {
 
     @Valid
     private List<ImageDTO> images;
+
+    @Valid
+    private List<Integer> productIds;
 }
