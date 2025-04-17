@@ -36,7 +36,7 @@ public class ProductRepository {
     private EntityManagerFactory entityManagerFactory;
 
     public Map<String, Object> createProduct(String productsName, String description,
-                                             BigDecimal price, Integer categoryId, String sizes) {
+                                             BigDecimal price, Integer categoryId, String sizes, String images) {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         EntityTransaction transaction = entityManager.getTransaction();
         Map<String, Object> result = new HashMap<>();
@@ -51,13 +51,15 @@ public class ProductRepository {
                     .registerStoredProcedureParameter("p_PRICE", BigDecimal.class, ParameterMode.IN)
                     .registerStoredProcedureParameter("p_CATEGORY_ID", Integer.class, ParameterMode.IN)
                     .registerStoredProcedureParameter("p_SIZES", String.class, ParameterMode.IN)
+                    .registerStoredProcedureParameter("p_IMAGES", String.class, ParameterMode.IN)
                     .registerStoredProcedureParameter("p_CODE", Integer.class, ParameterMode.OUT)
                     .registerStoredProcedureParameter("p_PRODUCT_ID", Integer.class, ParameterMode.OUT)
                     .setParameter("p_PRODUCTS_NAME", productsName)
                     .setParameter("p_DESCRIPTION", description)
                     .setParameter("p_PRICE", price)
                     .setParameter("p_CATEGORY_ID", categoryId)
-                    .setParameter("p_SIZES", sizes);
+                    .setParameter("p_SIZES", sizes)
+                    .setParameter("p_IMAGES", images);
 
             query.execute();
             
@@ -279,7 +281,7 @@ public class ProductRepository {
     }
 
     public Map<String, Object> updateProduct(Integer productId, String productsName,
-                                           String description, BigDecimal price, Integer categoryId, String sizes) {
+                                           String description, BigDecimal price, Integer categoryId, String sizes,  String images) {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         EntityTransaction transaction = entityManager.getTransaction();
         Map<String, Object> result = new HashMap<>();
@@ -295,13 +297,15 @@ public class ProductRepository {
                     .registerStoredProcedureParameter("p_PRICE", BigDecimal.class, ParameterMode.IN)
                     .registerStoredProcedureParameter("p_CATEGORY_ID", Integer.class, ParameterMode.IN)
                     .registerStoredProcedureParameter("p_SIZES", String.class, ParameterMode.IN)
+                    .registerStoredProcedureParameter("p_IMAGES", String.class, ParameterMode.IN)
                     .registerStoredProcedureParameter("p_CODE", Integer.class, ParameterMode.OUT)
                     .setParameter("p_PRODUCT_ID", productId)
                     .setParameter("p_PRODUCTS_NAME", productsName)
                     .setParameter("p_DESCRIPTION", description)
                     .setParameter("p_PRICE", price)
                     .setParameter("p_CATEGORY_ID", categoryId)
-                    .setParameter("p_SIZES", sizes);
+                    .setParameter("p_SIZES", sizes)
+                    .setParameter("p_IMAGES", images);
 
             query.execute();
             Integer code = (Integer) query.getOutputParameterValue("p_CODE");

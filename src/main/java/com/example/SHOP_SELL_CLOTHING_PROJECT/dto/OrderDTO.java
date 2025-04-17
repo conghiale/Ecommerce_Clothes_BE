@@ -52,6 +52,11 @@ public class OrderDTO {
     private String shippingAddress;
     private String billingAddress;
     private String transactionCode;
+    private String username;
+    private String firstName;
+    private String lastName;
+    private String phoneNumber;
+    private String productName;
 
     private LocalDateTime createAt;
     private LocalDateTime updateAt;

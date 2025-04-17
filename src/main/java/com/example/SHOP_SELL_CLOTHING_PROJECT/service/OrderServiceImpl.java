@@ -11,7 +11,6 @@ import com.example.SHOP_SELL_CLOTHING_PROJECT.IService.OrderService;
 import com.example.SHOP_SELL_CLOTHING_PROJECT.dto.APIResponseDTO;
 import com.example.SHOP_SELL_CLOTHING_PROJECT.dto.OrderDTO;
 import com.example.SHOP_SELL_CLOTHING_PROJECT.model.APIResponse;
-import com.example.SHOP_SELL_CLOTHING_PROJECT.model.Order;
 import com.example.SHOP_SELL_CLOTHING_PROJECT.repository.OrderRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -63,11 +62,39 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public APIResponse<String> getOrders(Integer userId, Integer page, Integer pageSize) throws JsonProcessingException {
-        Map<String, Object> result = orderRepository.getOrders(
+    public APIResponse<String> getOrdersByUser(Integer userId, Integer page, Integer pageSize) throws JsonProcessingException {
+        Map<String, Object> result = orderRepository.getOrdersByUser(
                 userId,
                 page,
                 pageSize
+        );
+
+        int code = (Integer) result.get("CODE");
+
+        if (code == 0 && result.get("ORDERS") != null) {
+            List<OrderDTO> orderDTOS = (List<OrderDTO>) result.get("ORDERS");
+            return new APIResponse<>(
+                    code,
+                    "Get orders by user successfully",
+                    objectMapper.writeValueAsString(orderDTOS),
+                    ResponseType.SUCCESS);
+        } else {
+            APIResponse<String> apiResponse = apiResponseServiceImpl.getAPIResponseByCode(code);
+            APIResponseDTO apiResponseDTO = apiResponse != null ?
+                    objectMapper.readValue(apiResponse.getData(), APIResponseDTO.class) :
+                    new APIResponseDTO();
+
+            return new APIResponse<>(code, apiResponseDTO.getMessage(), null, apiResponseDTO.getResponseType());
+        }
+    }
+
+    @Override
+    public APIResponse<String> getOrders(Integer page, Integer pageSize, String orderStatus, String paymentStatus) throws JsonProcessingException {
+        Map<String, Object> result = orderRepository.getOrders(
+                page,
+                pageSize,
+                orderStatus,
+                paymentStatus
         );
 
         int code = (Integer) result.get("CODE");

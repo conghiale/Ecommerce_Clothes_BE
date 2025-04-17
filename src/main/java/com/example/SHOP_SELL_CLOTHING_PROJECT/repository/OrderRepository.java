@@ -9,14 +9,11 @@ package com.example.SHOP_SELL_CLOTHING_PROJECT.repository;
 import com.example.SHOP_SELL_CLOTHING_PROJECT.ENUM.OrderStatus;
 import com.example.SHOP_SELL_CLOTHING_PROJECT.ENUM.PaymentMethod;
 import com.example.SHOP_SELL_CLOTHING_PROJECT.ENUM.PaymentStatus;
-import com.example.SHOP_SELL_CLOTHING_PROJECT.ENUM.ProductStatus;
 import com.example.SHOP_SELL_CLOTHING_PROJECT.dto.ImageDTO;
 import com.example.SHOP_SELL_CLOTHING_PROJECT.dto.OrderDTO;
 import com.example.SHOP_SELL_CLOTHING_PROJECT.dto.ProductDTO;
 import com.example.SHOP_SELL_CLOTHING_PROJECT.dto.ProductVariantDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,7 +85,7 @@ public class OrderRepository {
         return result;
     }
 
-    public Map<String, Object> getOrders(Integer userId, Integer page, Integer pageSize) {
+    public Map<String, Object> getOrdersByUser(Integer userId, Integer page, Integer pageSize) {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         EntityTransaction transaction = entityManager.getTransaction();
         Map<String, Object> result = new HashMap<>();
@@ -99,7 +96,7 @@ public class OrderRepository {
             transaction.begin();
 
             StoredProcedureQuery query = entityManager
-                    .createStoredProcedureQuery("SP_ORDER_GET_ALL")
+                    .createStoredProcedureQuery("SP_ORDER_GET_ALL_BY_USER")
                     .registerStoredProcedureParameter("p_USER_ID", Integer.class, ParameterMode.IN)
                     .registerStoredProcedureParameter("p_PAGE", Integer.class, ParameterMode.IN)
                     .registerStoredProcedureParameter("p_PAGE_SIZE", Integer.class, ParameterMode.IN)
@@ -114,6 +111,64 @@ public class OrderRepository {
             List<OrderDTO> orderDTOS = null;
 
             if (code == 0 && results != null && !results.isEmpty()) {
+                orderDTOS = new ArrayList<>();
+                for (Object item : results) {
+                    Object[] row = (Object[]) item;
+                    orderDTOS.add(mapOrderFromRow(row));
+                }
+            }
+
+            result.put("CODE", code);
+            result.put("ORDERS", orderDTOS);
+
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null && transaction.isActive()) {
+                transaction.rollback();
+            }
+            result.put("CODE", 1);
+            result.put("ERROR", e.getMessage());
+            log.error("[ORDER REPOSITORY] Get Orders. ERROR: ", e);
+        } finally {
+            if (entityManager.isOpen()) {
+                entityManager.close();
+            }
+        }
+
+        return result;
+    }
+
+    public Map<String, Object> getOrders(Integer page, Integer pageSize, String orderStatus, String paymentStatus) {
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        EntityTransaction transaction = entityManager.getTransaction();
+        Map<String, Object> result = new HashMap<>();
+
+//        System.out.println("[CHECK GET ORDERS] userId: " + userId + " | page: " + page + " | pageSize: " + pageSize);
+
+        try {
+            transaction.begin();
+
+            StoredProcedureQuery query = entityManager
+                    .createStoredProcedureQuery("SP_ORDER_GET_ALL")
+                    .registerStoredProcedureParameter("p_PAGE", Integer.class, ParameterMode.IN)
+                    .registerStoredProcedureParameter("p_PAGE_SIZE", Integer.class, ParameterMode.IN)
+                    .registerStoredProcedureParameter("p_ORDER_STATUS", String.class, ParameterMode.IN)
+                    .registerStoredProcedureParameter("p_PAYMENT_STATUS", String.class, ParameterMode.IN)
+                    .registerStoredProcedureParameter("p_CODE", Integer.class, ParameterMode.OUT)
+                    .setParameter("p_PAGE", page)
+                    .setParameter("p_PAGE_SIZE", pageSize)
+                    .setParameter("p_ORDER_STATUS", orderStatus)
+                    .setParameter("p_PAYMENT_STATUS", paymentStatus);
+
+            boolean hasResultSet = query.execute();
+            Integer code = (Integer) query.getOutputParameterValue("p_CODE");
+
+            List<OrderDTO> orderDTOS = null;
+
+            if (code == 0 && hasResultSet) {
+                @SuppressWarnings("unchecked")
+                List<Object[]> results = query.getResultList();
+
                 orderDTOS = new ArrayList<>();
                 for (Object item : results) {
                     Object[] row = (Object[]) item;
@@ -225,7 +280,12 @@ public class OrderRepository {
         orderDTO.setBillingAddress((String) row[7]);
         orderDTO.setCreateAt(((Timestamp) row[8]).toLocalDateTime());
         orderDTO.setUpdateAt(((Timestamp) row[9]).toLocalDateTime());
-        orderDTO.setTotalItems((Long) row[10]);
+        orderDTO.setUsername((String) row[10]);
+        orderDTO.setFirstName((String) row[11]);
+        orderDTO.setLastName((String) row[12]);
+        orderDTO.setPhoneNumber((String) row[13]);
+        orderDTO.setTotalItems((Long) row[14]);
+        orderDTO.setProductName((String) row[15]);
 
         return orderDTO;
     }
@@ -266,7 +326,7 @@ public class OrderRepository {
         if (row[23] != null && row[24] != null) {
             ImageDTO imageDTO = new ImageDTO();
             imageDTO.setImageId((Integer) row[23]);
-            imageDTO.setImageUrl((String) row[24]);
+            imageDTO.setProductImage((String) row[24]);
             imageDTO.setIsPrimary(true);
 
             productDTO.setImages(Collections.singletonList(imageDTO));

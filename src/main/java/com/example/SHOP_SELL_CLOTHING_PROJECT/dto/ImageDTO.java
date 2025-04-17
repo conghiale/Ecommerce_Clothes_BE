@@ -19,10 +19,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ImageDTO {
-    @NotBlank(message = "Image ID is required")
+//    @NotBlank(message = "Image ID is required")
     private Integer imageId;
 
-    private String imageUrl;
+    private String productImage;
 
     private Boolean isPrimary;
 }

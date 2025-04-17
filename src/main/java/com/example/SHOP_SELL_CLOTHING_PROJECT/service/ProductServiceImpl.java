@@ -54,6 +54,7 @@ public class ProductServiceImpl implements ProductService {
             .collect(Collectors.toList());
         
         String sizesJson = objectMapper.writeValueAsString(variantsList);
+        String imagesJson = objectMapper.writeValueAsString(productDTO.getImages());
 
         // Gọi repository để tạo sản phẩm
         Map<String, Object> result = productRepository.createProduct(
@@ -61,7 +62,8 @@ public class ProductServiceImpl implements ProductService {
                 productDTO.getDescription(),
                 productDTO.getPrice(),
                 productDTO.getCategoryID(),
-                sizesJson
+                sizesJson,
+                imagesJson
         );
 
         int code = (Integer) result.get("CODE");
@@ -209,6 +211,7 @@ public class ProductServiceImpl implements ProductService {
                 .collect(Collectors.toList());
 
         String sizesJson = objectMapper.writeValueAsString(variantsList);
+        String imagesJson = objectMapper.writeValueAsString(productDTO.getImages());
 
         Map<String, Object> result = productRepository.updateProduct(
                 productDTO.getProductId(),
@@ -216,7 +219,8 @@ public class ProductServiceImpl implements ProductService {
                 productDTO.getDescription(),
                 productDTO.getPrice(),
                 productDTO.getCategoryID(),
-                sizesJson
+                sizesJson,
+                imagesJson
         );
 
         int code = (Integer) result.get("CODE");

@@ -6,23 +6,15 @@ package com.example.SHOP_SELL_CLOTHING_PROJECT.controller;
  * Time: 11:50 AM
  */
 
-import com.example.SHOP_SELL_CLOTHING_PROJECT.ENUM.OrderStatus;
-import com.example.SHOP_SELL_CLOTHING_PROJECT.ENUM.PaymentMethod;
-import com.example.SHOP_SELL_CLOTHING_PROJECT.ENUM.PaymentStatus;
 import com.example.SHOP_SELL_CLOTHING_PROJECT.IService.OrderService;
-import com.example.SHOP_SELL_CLOTHING_PROJECT.IService.ProductService;
 import com.example.SHOP_SELL_CLOTHING_PROJECT.dto.*;
 import com.example.SHOP_SELL_CLOTHING_PROJECT.model.APIResponse;
-import com.example.SHOP_SELL_CLOTHING_PROJECT.model.Order;
-import com.example.SHOP_SELL_CLOTHING_PROJECT.model.User;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.math.BigDecimal;
 
 /**
  * @ 2025. All rights reserved
@@ -42,11 +34,24 @@ public class OrderController {
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<APIResponse<String>> getOrders(
+    public ResponseEntity<APIResponse<String>> getOrdersByUser(
             @PathVariable Integer userId,
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer pageSize) throws JsonProcessingException {
-        APIResponse<String> resultData = orderService.getOrders(userId, page, pageSize);
+        APIResponse<String> resultData = orderService.getOrdersByUser(userId, page, pageSize);
+        return ResponseEntity.ok(resultData);
+    }
+
+    @GetMapping("/")
+    public ResponseEntity<APIResponse<String>> getOrders(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer pageSize,
+            @RequestParam(required = false) String orderStatus,
+            @RequestParam(required = false) String paymentStatus) throws JsonProcessingException {
+        // Convert "null" string to null
+        String finalOrderStatus = "null".equalsIgnoreCase(orderStatus) ? null : orderStatus;
+        String finalPaymentStatus = "null".equalsIgnoreCase(paymentStatus) ? null : paymentStatus;
+        APIResponse<String> resultData = orderService.getOrders(page, pageSize, finalOrderStatus, finalPaymentStatus);
         return ResponseEntity.ok(resultData);
     }
 
